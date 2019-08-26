@@ -1,18 +1,20 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"log"
 )
 
+type Metric struct {
+	Description string `json:"description"`
+	Measurement int64  `json:"measurement"`
+}
+
 type Observation struct {
-	Timestamp int64
-	Value string
+	Label     string   `json:"label"`
+	Timestamp int64    `json:"timestamp"`
+	Values    []Metric `json:"values"`
 }
 
 func main() {
-	fmt.Println(Observation{
-		time.Now().Unix(),
-		"10 successful requests, 0 failed requests",
-	})
+	log.Println(Observation{})
 }
