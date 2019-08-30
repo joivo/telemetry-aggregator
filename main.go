@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"os"
+    "os/signal"
 
 	"github.com/gorilla/mux"
 	
@@ -49,6 +51,8 @@ func CreateObservation(resWriter http.ResponseWriter, req *http.Request) {
 func GetObservation(resWriter http.ResponseWriter, req *http.Request) {
 	resWriter.Header().Set("content-type", "application/json")
 
+	log.Println("Request for " + observationEndpoint + " received." + req)
+
 	params := mux.Vars(req)
 	id, _ := primitive.ObjectIDFromHex(params["id"])
 
@@ -67,12 +71,44 @@ func GetObservation(resWriter http.ResponseWriter, req *http.Request) {
 func main() {
 	log.Println("Starting service.")
 	
-	ctx, _ := context.WithTimeout(context.Background(), defaultTimeout)
+	var wait time.Duration
+    flag.DurationVar(&wait, "graceful-timeout", time.Second * 15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
+	flag.Parse()
+	
+	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	defer cancel()
+
 	clientOptions := options.Client().ApplyURI(mongoAddress)
 	client, _ = mongo.Connect(ctx, clientOptions)
 	router := mux.NewRouter()
 
-	router.HandleFunc(observationEndpoint, CreateObservation).Methods("POST")
 
-	http.ListenAndServe(":8090", router)
+	router.HandleFunc(observationEndpoint, CreateObservation).Methods("POST")
+	router.HandleFunc(observationEndpoint, GetObservation).Methods("GET")
+
+	srv := &http.Server{
+		Addr:         "0.0.0.0:8090",        
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler: router, 
+	}
+	
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+
+	signal.Notify(c, os.Interrupt)
+
+	<-c
+
+	srv.Shutdown(ctx)
+
+	log.Println("Shutting down service.")
+
+	os.Exit(0)	
 }
