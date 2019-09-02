@@ -2,7 +2,11 @@ FROM golang:rc-alpine
 
 WORKDIR /service
 
+EXPOSE 8090
+
 RUN apk add git
+
+RUN apk add curl
 
 ENV SRC_DIR=/go/src/github.com/emanueljoivo/telemetry-aggregator
 
