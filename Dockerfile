@@ -1,4 +1,4 @@
-FROM golang:rc-alpine
+FROM golang:alpine
 
 WORKDIR /service
 
@@ -10,9 +10,11 @@ RUN apk add curl
 
 ENV SRC_DIR=/go/src/github.com/emanueljoivo/telemetry-aggregator
 
+ENV CGO_ENABLED 0
+
 ADD . $SRC_DIR
 
-RUN cd $SRC_DIR; chmod +x build.sh && ./build.sh
+RUN cd $SRC_DIR; go mod tidy; go test
 
 RUN cd $SRC_DIR; go build -o aggregator; cp aggregator /service/
 
