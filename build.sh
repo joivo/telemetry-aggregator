@@ -1,3 +1,5 @@
-go get github.com/gorilla/mux \ 
-    go.mongodb.org/mongo-driver/bson \
-	go.mongodb.org/mongo-driver/mongo
+#!/bin/sh
+
+go get -u github.com/gorilla/mux
+go get -u go.mongodb.org/mongo-driver/bson
+go get -u go.mongodb.org/mongo-driver/mongo
