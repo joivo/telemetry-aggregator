@@ -123,7 +123,7 @@ func main() {
 	router.HandleFunc(observationEndpoint+"/{id}", GetObservation).Methods("GET")
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:8090",
+		Addr:         "0.0.0.0:8088",
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
