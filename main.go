@@ -21,7 +21,7 @@ import (
 var client *mongo.Client
 
 const (
-	mongoAddress        string = "mongodb://localhost:27017"
+	mongoAddress        string = "mongodb://0.0.0.0:27017"
 	dbName              string = "aggregatordb"
 	obsDBCollection     string = "observations"
 	observationEndpoint string = "/observation"
