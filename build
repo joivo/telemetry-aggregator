@@ -1,6 +1,4 @@
 #!/bin/sh
 
 /usr/local/go/bin/go mod init
-/usr/local/go/bin/go mod tidy
-/usr/local/go/bin/go test
-/usr/local/go/bin/go build -o aggregator
+/usr/local/go/bin/go build
