@@ -1,9 +1,13 @@
-FROM alpine
+FROM debian:stretch-slim
+
+MAINTAINER emanueljoivo@lsd.ufcg.edu.br
 
 WORKDIR /service
 
 EXPOSE 8088
 
-COPY aggregator /service
+COPY telemetry-aggregator /service
 
-ENTRYPOINT ["sh", "-c", "'./aggregator'"]
+RUN ["/bin/sh", "-c", "chmod +x telemetry-aggregator"]
+
+ENTRYPOINT ["./telemetry-aggregator"]
