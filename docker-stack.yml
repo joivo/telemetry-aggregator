@@ -2,41 +2,28 @@ version: "3.7"
 services:
 
   db:
-    image: mongo:3.4-xenial
+    image: mongo:4.2.0-bionic
     ports:
       - "27017:27017"
     volumes:
-      - db-data:/var/lib/mongo/data
+      - db-data:/data/db
     deploy:
-      placement:
-        constraints: [node.role == manager]
+      mode: global
 
   telemetry-aggregator:
-    image: emanueljoivo/telemetry-aggregator:v1.0.2
-    ports:
-      - "8090:8090"
+    image: emanueljoivo/telemetry-aggregator:v1.0.6
     deploy:
       replicas: 2
       update_config:
         parallelism: 1
         delay: 10s
-      restart_policy:
-        condition: on-failure
+    ports:
+      - "8088:8088"
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "10"
-
-  visualizer:
-    image: dockersamples/visualizer:stable
-    ports:
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    deploy:
-      placement:
-        constraints: [node.role == manager]
 
 volumes:
   db-data:
