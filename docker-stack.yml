@@ -3,6 +3,8 @@ services:
 
   db:
     image: mongo:4.2.0-bionic
+    networks:
+      - fogbow
     ports:
       - "27017:27017"
     volumes:
@@ -11,7 +13,9 @@ services:
       mode: global
 
   telemetry-aggregator:
-    image: emanueljoivo/telemetry-aggregator:v1.0.6
+    image: emanueljoivo/telemetry-aggregator:latest
+    networks:
+      - fogbow
     deploy:
       replicas: 2
       update_config:
@@ -27,3 +31,6 @@ services:
 
 volumes:
   db-data:
+networks:
+  fogbow:
+    driver: overlay

@@ -21,9 +21,9 @@ import (
 var client *mongo.Client
 
 const (
-	mongoAddress        string = "mongodb://0.0.0.0:27017"
+	dbAddress           string = "mongodb://db:27017"
 	dbName              string = "aggregatordb"
-	obsDBCollection     string = "observations"
+	dbCollection        string = "observations"
 	observationEndpoint string = "/observation"
 	versionEndpoint     string = "/version"
 	defaultTimeout             = 10 * time.Second
@@ -58,7 +58,7 @@ func CreateObservation(resWriter http.ResponseWriter, req *http.Request) {
 
 	var observation Observation
 	_ = json.NewDecoder(req.Body).Decode(&observation)
-	collection := client.Database(dbName).Collection(obsDBCollection)
+	collection := client.Database(dbName).Collection(dbCollection)
 	ctx, _ := context.WithTimeout(context.Background(), defaultTimeout)
 	result, err := collection.InsertOne(ctx, observation)
 
@@ -86,7 +86,7 @@ func GetObservation(resWriter http.ResponseWriter, req *http.Request) {
 
 	var observation Observation
 
-	collection := client.Database(dbName).Collection(obsDBCollection)
+	collection := client.Database(dbName).Collection(dbCollection)
 	ctx, _ := context.WithTimeout(context.Background(), defaultTimeout)
 	err := collection.FindOne(ctx, filter).Decode(&observation)
 
@@ -114,7 +114,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 
-	clientOptions := options.Client().ApplyURI(mongoAddress)
+	clientOptions := options.Client().ApplyURI(dbAddress)
 	client, _ = mongo.Connect(ctx, clientOptions)
 	router := mux.NewRouter()
 
