@@ -14,13 +14,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
-
-    - name: Get dependencies
-      run: |
-        go mod init main.go
-        go mod tidy
-        go test
+      uses: actions/checkout@v1    
 
     - name: Build
       run: go build -o aggregator
