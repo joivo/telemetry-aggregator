@@ -35,7 +35,7 @@ type Version struct {
 
 type Metric struct {
 	Description string `json:"description" bson:"description"`
-	Measurement int64  `json:"measurement" bson:"measurement"`
+	Measurement float64  `json:"measurement" bson:"measurement"`
 }
 
 type Observation struct {

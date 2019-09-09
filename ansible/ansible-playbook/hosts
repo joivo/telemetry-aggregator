@@ -1,0 +1,5 @@
+[aggregator-machine]
+10.11.4.34
+[aggregator-machine:vars]
+ansible_ssh_private_key_file=/home/emanueljbm/.ssh/fogbow_priv
+ansible_python_interpreter=/usr/bin/python3
