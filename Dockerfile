@@ -1,19 +1,13 @@
-FROM golang:rc-alpine
+FROM debian:stretch-slim
+
+MAINTAINER emanueljoivo@lsd.ufcg.edu.br
 
 WORKDIR /service
 
-EXPOSE 8090
+EXPOSE 8088
 
-RUN apk add git
+COPY telemetry-aggregator /service
 
-RUN apk add curl
+RUN ["/bin/sh", "-c", "chmod +x telemetry-aggregator"]
 
-ENV SRC_DIR=/go/src/github.com/emanueljoivo/telemetry-aggregator
-
-ADD . $SRC_DIR
-
-RUN cd $SRC_DIR; chmod +x build.sh && ./build.sh
-
-RUN cd $SRC_DIR; go build -o aggregator; cp aggregator /service/
-
-ENTRYPOINT ["./aggregator"]
+ENTRYPOINT ["./telemetry-aggregator"]

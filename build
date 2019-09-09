@@ -1,0 +1,4 @@
+#!/bin/sh
+
+/usr/local/go/bin/go mod init
+/usr/local/go/bin/go build

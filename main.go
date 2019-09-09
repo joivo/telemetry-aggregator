@@ -21,9 +21,9 @@ import (
 var client *mongo.Client
 
 const (
-	mongoAddress        string = "mongodb://localhost:27017"
+	dbAddress           string = "mongodb://db:27017"
 	dbName              string = "aggregatordb"
-	obsDBCollection     string = "observations"
+	dbCollection        string = "observations"
 	observationEndpoint string = "/observation"
 	versionEndpoint     string = "/version"
 	defaultTimeout             = 10 * time.Second
@@ -35,7 +35,7 @@ type Version struct {
 
 type Metric struct {
 	Description string `json:"description" bson:"description"`
-	Measurement int64  `json:"measurement" bson:"measurement"`
+	Measurement float64  `json:"measurement" bson:"measurement"`
 }
 
 type Observation struct {
@@ -58,7 +58,7 @@ func CreateObservation(resWriter http.ResponseWriter, req *http.Request) {
 
 	var observation Observation
 	_ = json.NewDecoder(req.Body).Decode(&observation)
-	collection := client.Database(dbName).Collection(obsDBCollection)
+	collection := client.Database(dbName).Collection(dbCollection)
 	ctx, _ := context.WithTimeout(context.Background(), defaultTimeout)
 	result, err := collection.InsertOne(ctx, observation)
 
@@ -86,7 +86,7 @@ func GetObservation(resWriter http.ResponseWriter, req *http.Request) {
 
 	var observation Observation
 
-	collection := client.Database(dbName).Collection(obsDBCollection)
+	collection := client.Database(dbName).Collection(dbCollection)
 	ctx, _ := context.WithTimeout(context.Background(), defaultTimeout)
 	err := collection.FindOne(ctx, filter).Decode(&observation)
 
@@ -114,7 +114,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 
-	clientOptions := options.Client().ApplyURI(mongoAddress)
+	clientOptions := options.Client().ApplyURI(dbAddress)
 	client, _ = mongo.Connect(ctx, clientOptions)
 	router := mux.NewRouter()
 
@@ -123,7 +123,7 @@ func main() {
 	router.HandleFunc(observationEndpoint+"/{id}", GetObservation).Methods("GET")
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:8090",
+		Addr:         "0.0.0.0:8088",
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
