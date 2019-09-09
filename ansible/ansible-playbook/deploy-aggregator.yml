@@ -1,0 +1,20 @@
+---
+- hosts: aggregator-machine
+  vars:
+    setup_env: bash -x setup.sh               
+    deploy_stack: bash -x deploy-stack.sh    
+  tasks:     
+    - name: Copy Swarm Files
+      copy: src="../compose/" dest="/home/ubuntu"  
+
+    - name: Setting up environment
+      shell: "{{ setup_env }}"
+      become: yes          
+
+    - name: Deploy Stack of Services
+      shell: "{{ deploy_stack }}"
+      become: yes 
+
+    - name: Cleaning up
+      shell: rm -rf setup.sh .ansible/ docker-stack.yml deploy-stack.sh
+      become: yes

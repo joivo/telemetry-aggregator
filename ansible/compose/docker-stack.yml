@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+
+  db:
+    image: mongo:4.2.0-bionic
+    networks:
+      - fogbow
+    ports:
+      - "27017:27017"
+    volumes:
+      - db-data:/data/db
+    deploy:
+      mode: global
+
+  telemetry-aggregator:
+    image: emanueljoivo/telemetry-aggregator:latest
+    networks:
+      - fogbow
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+    ports:
+      - "8088:8088"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+volumes:
+  db-data:
+networks:
+  fogbow:
+    driver: overlay
