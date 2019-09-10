@@ -12,6 +12,16 @@ services:
     deploy:
       mode: global
 
+  probes:
+    image: wesleymonte/probes
+    networks:
+      - fogbow
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+
   telemetry-aggregator:
     image: emanueljoivo/telemetry-aggregator:latest
     networks:
