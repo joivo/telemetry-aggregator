@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/push"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,6 +23,7 @@ import (
 var client *mongo.Client
 
 const (
+	pushGatewayAddress  string = "127.0.0.1:9091"
 	dbAddress           string = "mongodb://db:27017"
 	dbName              string = "aggregatordb"
 	dbCollection        string = "observations"
@@ -34,15 +37,40 @@ type Version struct {
 }
 
 type Metric struct {
-	Description string `json:"description" bson:"description"`
-	Measurement float64  `json:"measurement" bson:"measurement"`
+	Description string  `json:"description" bson:"description"`
+	Measurement float64 `json:"measurement" bson:"measurement"`
 }
 
 type Observation struct {
-	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Label     string             `json:"label" bson:"label"`
-	Timestamp int64              `json:"timestamp" bson:"timestamp"`
-	Values    []Metric           `json:"values" bson:"values"`
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Label       string             `json:"label" bson:"label"`
+	Description string             `json:"description" bson:"description"`
+	Timestamp   int64              `json:"timestamp" bson:"timestamp"`
+	Values      []Metric           `json:"values" bson:"values"`
+}
+
+type Pusher interface {
+	Push(o *Observation)
+}
+
+type PrometheusPusher struct{}
+
+func (p PrometheusPusher) Push(o *Observation) {
+	go func() {
+		observation := prometheus.NewHistogram(prometheus.HistogramOpts{
+			Name: o.Label,
+			Help: o.Description,
+			Buckets: prometheus.DefBuckets()
+		})
+
+		observation.Write()
+
+		if err := push.New(pushGatewayAddress, "probe_by_observations").
+			Collector(observation).
+			Push(); err != nil {
+			log.Println("Could not push completion time to Push Gateway: ", err)
+		}
+	}()
 }
 
 func GetVersion(resWriter http.ResponseWriter, req *http.Request) {
@@ -57,6 +85,8 @@ func CreateObservation(resWriter http.ResponseWriter, req *http.Request) {
 	resWriter.Header().Set("content-type", "application/json")
 
 	var observation Observation
+	var pusher Pusher = PrometheusPusher{}
+
 	_ = json.NewDecoder(req.Body).Decode(&observation)
 	collection := client.Database(dbName).Collection(dbCollection)
 	ctx, _ := context.WithTimeout(context.Background(), defaultTimeout)
@@ -65,10 +95,12 @@ func CreateObservation(resWriter http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		resWriter.WriteHeader(http.StatusInternalServerError)
 		if _, err := resWriter.Write([]byte(`{ "message": "` + err.Error() + `" }`)); err != nil {
-			//the blank field returns the number of bytes written
+			// the blank field returns the number of bytes written
 			log.Println(err.Error())
 		}
 	}
+
+	pusher.Push(&observation) // sends the data to the prometheus push gateway
 
 	if err := json.NewEncoder(resWriter).Encode(result); err != nil {
 		log.Println(err.Error())
