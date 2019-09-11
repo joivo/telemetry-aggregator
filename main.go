@@ -21,7 +21,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client
+var (
+	client *mongo.Client
+	addr = flag.String("listen-address", ":8088", "The address to listen on for HTTP requests.")
+)
 
 func GetVersion(resWriter http.ResponseWriter, req *http.Request) {
 	resWriter.WriteHeader(http.StatusOK)
@@ -91,6 +94,7 @@ func main() {
 	var wait time.Duration
 	flag.DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server "+
 		"gracefully wait for existing connections to finish - e.g. 15s or 1m")
+
 	flag.Parse()
 
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
@@ -105,7 +109,7 @@ func main() {
 	router.HandleFunc(api.MetricEndpoint+"/{id}", GetMetric).Methods("GET")
 
 	srv := &http.Server{
-		Addr:         ":8088",
+		Addr:         *addr,
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,

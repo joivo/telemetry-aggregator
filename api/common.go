@@ -6,7 +6,7 @@ import "time"
 const (
 	PushGatewayAddr    = "http://pushgateway:9091"
 
-	DatabaseAddr       = "mongodb://db:27017"
+	DatabaseAddr       = "mongodb://127.0.0.1:27017"
 	DatabaseName       = "aggregator"
 	DatabaseCollection = "metrics"
 
