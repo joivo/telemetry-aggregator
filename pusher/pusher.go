@@ -13,7 +13,12 @@ const (
 	ServiceReachability = "service_reachability"
 	ServiceSuccessRate  = "service_success_rate"
 	ServiceLatency      = "service_latency"
-	ServiceAvailability = "service_availability"
+	ResourceAvailability = "resource_availability"
+)
+
+const (
+	ServiceLabel  = "service"
+	ResourceLabel = "resource"
 )
 
 type Pusher interface {
@@ -24,12 +29,15 @@ type PrometheusPusher struct{}
 
 func (p PrometheusPusher) Push(m *Metric) {
 	go func() {
-		metric := prometheus.NewHistogram(prometheus.HistogramOpts{
+		var labels = generateLabels(m)
+
+		metric := prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: m.Name,
 			Help: m.Help,
+			ConstLabels: labels,
 		})
 
-		if err := push.New(api.PushGatewayAddr, "probe_by_observations").
+		if err := push.New(api.PushGatewayAddr, "probing_structure").
 			Collector(metric).
 			Push(); err != nil {
 			log.Println("Could not push completion time to Push Gateway: ", err)
@@ -37,10 +45,16 @@ func (p PrometheusPusher) Push(m *Metric) {
 	}()
 }
 
-func generateLabels(m *Metric) {
+func generateLabels(m *Metric) map[string]string {
+
+	var labels = make(map[string]string)
 
 	if m.Name == ServiceReachability {
-
+		labels[ServiceLabel] = "don't supported yet"
+	} else {
+		labels[ServiceLabel] = "ras"
+		labels[ResourceLabel] = "don't supported yet"
 	}
 
+	return labels
 }

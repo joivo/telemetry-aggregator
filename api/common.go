@@ -4,7 +4,7 @@ import "time"
 
 // DefaultVersion of Current REST API
 const (
-	PushGatewayAddr    = "http://pushgateway:9091"
+	PushGatewayAddr    = "http://127.0.0.1:9091"
 
 	DatabaseAddr       = "mongodb://127.0.0.1:27017"
 	DatabaseName       = "aggregator"
