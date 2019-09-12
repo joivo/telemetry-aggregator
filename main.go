@@ -53,7 +53,7 @@ func CreateMetric(resWriter http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	p.Push(&observation) // sends the data to the prometheus push gateway
+	p.PushMetric(&observation) // sends the data to the prometheus push gateway
 
 	if err := json.NewEncoder(resWriter).Encode(result); err != nil {
 		log.Println(err.Error())
