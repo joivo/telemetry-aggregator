@@ -16,6 +16,8 @@ services:
     image: wesleymonte/probes
     networks:
       - fogbow
+    ports:
+      - "8089:8089"
     deploy:
       replicas: 2
       update_config:
