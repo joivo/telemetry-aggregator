@@ -12,6 +12,18 @@ services:
     deploy:
       mode: global
 
+  probes:
+    image: wesleymonte/probes
+    networks:
+      - fogbow
+    ports:
+      - "8089:8089"
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+
   telemetry-aggregator:
     image: emanueljoivo/telemetry-aggregator:latest
     networks:
