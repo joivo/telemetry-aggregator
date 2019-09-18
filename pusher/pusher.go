@@ -2,8 +2,9 @@ package pusher
 
 import (
 	"log"
-	"os"
 	"strings"
+
+	"github.com/emanueljoivo/telemetry-aggregator/api"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
@@ -14,11 +15,13 @@ type Pusher interface {
 }
 
 const (
-	PushGatewayAddr = "PUSHGATEWAY_ADDR"
 	Reachability = "reachability"
 	SuccessRate  = "success_rate"
 	Latency      = "latency"
 	Availability = "availability"
+)
+
+const (
 	ServiceLabel  = "service"
 	ResourceLabel = "resource"
 )
@@ -38,16 +41,10 @@ func (p PrometheusPusher) PushMetric(m *Metric) {
 
 	log.Print("Pushing metric " + metricName + " to the Pushgateway.")
 
-	pushgatewayAddr, exists := os.LookupEnv(PushGatewayAddr)
-
-	if exists {
-		if err := push.New(pushgatewayAddr, "collect_fogbow_metric").
-			Collector(metric).
-			Add(); err != nil {
-			log.Println("Could not push completion time to Pushgateway: ", err)
-		}
-	} else {
-		log.Fatal("No push gateway address on the environment.")
+	if err := push.New(api.PushGatewayAddr, "probe_fogbow_stack").
+		Collector(metric).
+		Add(); err != nil {
+		log.Println("Could not push completion time to Pushgateway: ", err)
 	}
 }
 
