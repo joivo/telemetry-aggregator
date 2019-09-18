@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/emanueljoivo/telemetry-aggregator/api"
 	"github.com/emanueljoivo/telemetry-aggregator/pusher"
 
 	"github.com/gorilla/mux"
@@ -21,15 +21,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	DbAddrConfKey       = "MONGODB_ADDR"
+	DbNameConfKey       = "MONGODB_DATABASE_NAME"
+	DbCollectionConfKey = "MONGODB_DATABASE_COLLECTION_METRICS"
+
+	MetricEndpoint     = "/metric"
+	VersionEndpoint    = "/version"
+
+	DefaultVersion     = "v1.0.0"
+	DefaultTimeout     = 10 * time.Second
+)
+
+type Version struct {
+	Tag string `json:"tag"`
+}
+
 var (
 	client *mongo.Client
-	addr = flag.String("listen-address", ":8088", "The address to listen on for HTTP requests.")
 )
 
 func GetVersion(resWriter http.ResponseWriter, req *http.Request) {
 	resWriter.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(resWriter).Encode(api.Version{api.DefaultVersion}); err != nil {
+	if err := json.NewEncoder(resWriter).Encode(Version{DefaultVersion}); err != nil {
 		log.Println(err.Error())
 	}
 }
@@ -41,9 +56,12 @@ func CreateMetric(resWriter http.ResponseWriter, req *http.Request) {
 	var p pusher.Pusher = pusher.PrometheusPusher{}
 
 	_ = json.NewDecoder(req.Body).Decode(&observation)
-	collection := client.Database(api.DatabaseName).Collection(api.DatabaseCollection)
-	ctx, _ := context.WithTimeout(context.Background(), api.DefaultTimeout)
-	result, err := collection.InsertOne(ctx, observation)
+
+	collection := client.Database(os.Getenv(DbNameConfKey)).Collection(os.Getenv(DbCollectionConfKey))
+
+	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
+
+	result, err := collection.InsertOne(ctx, &observation)
 
 	if err != nil {
 		resWriter.WriteHeader(http.StatusInternalServerError)
@@ -66,13 +84,12 @@ func GetMetric(resWriter http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	id, _ := primitive.ObjectIDFromHex(params["id"])
 
-	log.Println(id)
 	filter := bson.M{"_id": id}
 
 	var observation pusher.Metric
 
-	collection := client.Database(api.DatabaseName).Collection(api.DatabaseCollection)
-	ctx, _ := context.WithTimeout(context.Background(), api.DefaultTimeout)
+	collection := client.Database(os.Getenv(DbNameConfKey)).Collection(os.Getenv(DbCollectionConfKey))
+	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
 	err := collection.FindOne(ctx, filter).Decode(&observation)
 
 	if err != nil {
@@ -88,25 +105,53 @@ func GetMetric(resWriter http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func main() {
+func validateEnv() {
+	if _, exists := os.LookupEnv(DbAddrConfKey); !exists {
+		log.Fatal("No database address on the environment.")
+	} else if _ , exists := os.LookupEnv(DbNameConfKey); !exists {
+		log.Fatal("No database name on the environment.")
+	} else {
+		log.Println("Environment loaded with success.")
+	}
+}
+
+func init() {
 	log.Println("Starting service.")
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("No .env file found.")
+	}
+
+	validateEnv()}
+
+
+func main() {
 
 	var wait time.Duration
 	flag.DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server "+
 		"gracefully wait for existing connections to finish - e.g. 15s or 1m")
-
+	var addr = flag.String("listen-address", ":8088", "The address to listen on for HTTP requests.")
 	flag.Parse()
 
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 
-	clientOptions := options.Client().ApplyURI(api.DatabaseAddr)
+	clientOptions := options.Client().ApplyURI(os.Getenv(DbAddrConfKey))
 	client, _ = mongo.Connect(ctx, clientOptions)
+
+	err := client.Ping(context.TODO(), nil)
+
+	if err != nil {
+		log.Fatal("Error to connect with db: ", err)
+	}
+
+	log.Println("Connected with the database.")
+
+
 	router := mux.NewRouter()
 
-	router.HandleFunc(api.VersionEndpoint, GetVersion).Methods("GET")
-	router.HandleFunc(api.MetricEndpoint, CreateMetric).Methods("POST")
-	router.HandleFunc(api.MetricEndpoint+"/{id}", GetMetric).Methods("GET")
+	router.HandleFunc(VersionEndpoint, GetVersion).Methods("GET")
+	router.HandleFunc(MetricEndpoint, CreateMetric).Methods("POST")
+	router.HandleFunc(MetricEndpoint+"/{id}", GetMetric).Methods("GET")
 
 	srv := &http.Server{
 		Addr:         *addr,
