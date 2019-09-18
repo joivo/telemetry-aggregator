@@ -1,4 +1,14 @@
 version: "3.7"
+
+volumes:
+  mongodata: {}
+  prometheus: {}
+  grafana: {}
+
+networks:
+  net:
+    driver: overlay
+
 services:
 
   db:
@@ -8,21 +18,9 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - db-data:/data/db
+      - mongodata:/data/db
     deploy:
       mode: global
-
-  probes:
-    image: wesleymonte/probes
-    networks:
-      - fogbow
-    ports:
-      - "8089:8089"
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
 
   telemetry-aggregator:
     image: emanueljoivo/telemetry-aggregator:latest
@@ -34,15 +32,68 @@ services:
         parallelism: 1
         delay: 10s
     ports:
-      - "8088:8088"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+      - "8088:8088"    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
 
-volumes:
-  db-data:
-networks:
-  fogbow:
-    driver: overlay
+  prometheus: 
+    image: prom/prometheus
+    networks:
+      - net    
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 128M
+
+  pushgateway:
+    image: prom/pushgateway
+    ports:
+      - "9091:9091"
+    networks:
+      - net
+
+  grafana:     
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    networks:
+      - net
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager      
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
