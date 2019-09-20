@@ -24,6 +24,8 @@ services:
 
   telemetry-aggregator:
     image: emanueljoivo/telemetry-aggregator:latest
+    env_file:
+      - .env
     networks:
       - fogbow
     deploy:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
@@ -116,6 +117,9 @@ func validateEnv() {
 
 func init() {
 	log.Println("Starting service.")
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("No .env file found.")
+	}
 
 	validateEnv()}
 

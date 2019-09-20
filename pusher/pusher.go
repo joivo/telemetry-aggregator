@@ -12,7 +12,7 @@ type Pusher interface {
 }
 
 const (
-	PushGatewayAddr = "reachability"
+	PushGatewayAddr = "PUSHGATEWAY_ADDR"
 )
 
 type PrometheusPusher struct{}
