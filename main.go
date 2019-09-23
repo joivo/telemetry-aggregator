@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/emanueljoivo/telemetry-aggregator/pusher"
+	"github.com/emanueljoivo/telemetry-aggregator/pkg/pusher"
 
 	"github.com/gorilla/mux"
 
@@ -26,11 +25,11 @@ const (
 	DbNameConfKey       = "MONGODB_DATABASE_NAME"
 	DbCollectionConfKey = "MONGODB_DATABASE_COLLECTION_METRICS"
 
-	MetricEndpoint     = "/metric"
-	VersionEndpoint    = "/version"
+	MetricEndpoint  = "/metric"
+	VersionEndpoint = "/version"
 
-	DefaultVersion     = "v1.0.0"
-	DefaultTimeout     = 10 * time.Second
+	DefaultVersion = "v1.0.0"
+	DefaultTimeout = 10 * time.Second
 )
 
 type Version struct {
@@ -108,7 +107,7 @@ func GetMetric(resWriter http.ResponseWriter, req *http.Request) {
 func validateEnv() {
 	if _, exists := os.LookupEnv(DbAddrConfKey); !exists {
 		log.Fatal("No database address on the environment.")
-	} else if _ , exists := os.LookupEnv(DbNameConfKey); !exists {
+	} else if _, exists := os.LookupEnv(DbNameConfKey); !exists {
 		log.Fatal("No database name on the environment.")
 	} else {
 		log.Println("Environment loaded with success.")
@@ -117,12 +116,9 @@ func validateEnv() {
 
 func init() {
 	log.Println("Starting service.")
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("No .env file found.")
-	}
 
-	validateEnv()}
-
+	validateEnv()
+}
 
 func main() {
 
@@ -145,7 +141,6 @@ func main() {
 	}
 
 	log.Println("Connected with the database.")
-
 
 	router := mux.NewRouter()
 
