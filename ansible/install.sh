@@ -35,7 +35,6 @@ ANSIBLE_CFG_FILE=$ANSIBLE_FILES_PATH/"ansible.cfg"
 echo "Ansible SSH private key file path: $PRIVATE_KEY_FILE_PATH"
 echo "Remote user of host: $REMOTE_USER"
 echo "Host IP: $DEPLOYED_HOST_IP"
-echo "Remote user: $REMOTE_USER"
 
 #Testing ssh-port
 SSH_PORT_STATUS=$(nmap $DEPLOYED_HOST_IP -PN -p SSH | egrep 'open|closed|filtered')

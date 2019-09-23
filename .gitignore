@@ -12,6 +12,9 @@
 # Environment config
 .env
 
+# Ansible garbage
+ansible/ansible-playbook/deploy-aggregator.retry
+
 # Test binary, built with `go test -c`
 *.test
 

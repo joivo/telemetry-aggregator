@@ -1,16 +1,8 @@
 version: "3.7"
 
-volumes:
-  mongodata: {}
-  prometheus: {}
-  grafana: {}
-
-networks:
-  net:
-    driver: overlay
-
 services:
 
+# Particular services #
   db:
     image: mongo:4.2.0-bionic
     networks:
@@ -22,10 +14,10 @@ services:
     deploy:
       mode: global
 
-  telemetry-aggregator:
-    image: emanueljoivo/telemetry-aggregator:latest
+  aggregator:
+    image: emanueljoivo/telemetry-aggregator:v1.0.0
     env_file:
-      - .env
+      - ./aggregator/config.env
     networks:
       - fogbow
     deploy:
@@ -34,19 +26,16 @@ services:
         parallelism: 1
         delay: 10s
     ports:
-      - "8088:8088"    
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8088"]
-      interval: 5s
-      timeout: 1s
-      retries: 5
+      - "8088:8088"
+
+# Prometheus stack required #
 
   prometheus: 
     image: prom/prometheus
     networks:
-      - net    
+      - fogbow    
     volumes:
-      - prometheus:/prometheus
+      - prometheusdata:/prometheus
       - ./prometheus/:/etc/prometheus/
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -72,7 +61,7 @@ services:
     ports:
       - "9091:9091"
     networks:
-      - net
+      - fogbow
 
   grafana:     
     image: grafana/grafana
@@ -81,9 +70,9 @@ services:
     ports:
       - 3000:3000
     networks:
-      - net
+      - fogbow
     volumes:
-      - grafana_data:/var/lib/grafana
+      - grafanadata:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
       - ./grafana/config.monitoring
@@ -99,3 +88,12 @@ services:
         reservations:
           memory: 64M
 
+volumes:
+  mongodata: {}
+  prometheusdata: {}
+  grafanadata: {}
+
+# General config #
+networks:
+  fogbow:
+    driver: overlay
