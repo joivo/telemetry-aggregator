@@ -3,7 +3,7 @@
 # A script to setup a swarm manager environment.
 # It expects to be run on Ubuntu 16.04 via 'sudo'
 
-install-docker() {
+install_docker() {
     echo "--> Installing docker"
     apt update
 
@@ -28,15 +28,14 @@ install-docker() {
 }
 
 run() {
-    CHECK_DOCKER_INSTALLATION=$(dpkg -l | grep -c docker-ce)
+    DOCKER_INSTALLED=$(dpkg -l | grep -c docker-ce)
 
-    if ! [ $CHECK_DOCKER_INSTALLATION -ne 0 ]; then
-        install-docker
+    if ! [ $DOCKER_INSTALLED -ne 0 ]; then
+        install_docker
+        docker swarm init 
     else 
-        echo "--> Docker its already installed"
-    fi    
-
-    docker swarm init    
+        echo "--> Docker already installed!"
+    fi
 }
 
 run
