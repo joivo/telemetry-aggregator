@@ -13,7 +13,7 @@
 
     - name: Deploy Stack of Services
       shell: "{{ deploy_stack }}"
-      become: yes 
+      become: yes
 
     - name: Cleaning up
       shell: rm -rf .ansible/ stack/
