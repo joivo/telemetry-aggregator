@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"github.com/emanueljoivo/telemetry-aggregator/pkg/broker"
+	"github.com/emanueljoivo/telemetry-aggregator/pkg/models"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/emanueljoivo/telemetry-aggregator/pkg/pusher"
 
 	"github.com/gorilla/mux"
 
@@ -20,30 +20,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	DbAddrConfKey       = "MONGODB_ADDR"
-	DbNameConfKey       = "MONGODB_DATABASE_NAME"
-	DbCollectionConfKey = "MONGODB_DATABASE_COLLECTION_METRICS"
+const DbAddrConfKey       = "MONGODB_ADDR"
+const DbNameConfKey       = "MONGODB_DATABASE_NAME"
+const DbCollectionConfKey = "MONGODB_DATABASE_COLLECTION_METRICS"
 
-	MetricEndpoint  = "/metric"
-	VersionEndpoint = "/version"
+const MetricEndpoint  = "/metric"
+const VersionEndpoint = "/version"
 
-	DefaultVersion = "v1.0.0"
-	DefaultTimeout = 10 * time.Second
-)
+const DefaultVersion = "v1.1.0"
 
-type Version struct {
-	Tag string `json:"tag"`
-}
+var client *mongo.Client
 
-var (
-	client *mongo.Client
-)
 
 func GetVersion(resWriter http.ResponseWriter, req *http.Request) {
 	resWriter.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(resWriter).Encode(Version{DefaultVersion}); err != nil {
+	if err := json.NewEncoder(resWriter).Encode(models.Version{Tag: DefaultVersion}); err != nil {
 		log.Println(err.Error())
 	}
 }
@@ -51,16 +43,15 @@ func GetVersion(resWriter http.ResponseWriter, req *http.Request) {
 func CreateMetric(resWriter http.ResponseWriter, req *http.Request) {
 	resWriter.Header().Set("content-type", "application/json")
 
-	var observation pusher.Metric
-	var p pusher.Pusher = pusher.PrometheusPusher{}
+	var metric models.Metric
 
-	_ = json.NewDecoder(req.Body).Decode(&observation)
+	_ = json.NewDecoder(req.Body).Decode(&metric)
 
 	collection := client.Database(os.Getenv(DbNameConfKey)).Collection(os.Getenv(DbCollectionConfKey))
 
-	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
+	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
 
-	result, err := collection.InsertOne(ctx, &observation)
+	result, err := collection.InsertOne(ctx, &metric)
 
 	if err != nil {
 		resWriter.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +61,7 @@ func CreateMetric(resWriter http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	p.PushMetric(&observation) // sends the data to the prometheus push gateway
+	broker.Place(&metric) // place the metric in a pool
 
 	if err := json.NewEncoder(resWriter).Encode(result); err != nil {
 		log.Println(err.Error())
@@ -85,11 +76,11 @@ func GetMetric(resWriter http.ResponseWriter, req *http.Request) {
 
 	filter := bson.M{"_id": id}
 
-	var observation pusher.Metric
+	var metric models.Metric
 
 	collection := client.Database(os.Getenv(DbNameConfKey)).Collection(os.Getenv(DbCollectionConfKey))
-	ctx, _ := context.WithTimeout(context.Background(), DefaultTimeout)
-	err := collection.FindOne(ctx, filter).Decode(&observation)
+	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
+	err := collection.FindOne(ctx, filter).Decode(&metric)
 
 	if err != nil {
 		resWriter.WriteHeader(http.StatusInternalServerError)
@@ -98,7 +89,7 @@ func GetMetric(resWriter http.ResponseWriter, req *http.Request) {
 		}
 	} else {
 		resWriter.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(resWriter).Encode(observation); err != nil {
+		if err := json.NewEncoder(resWriter).Encode(metric); err != nil {
 			log.Println(err.Error())
 		}
 	}
@@ -141,6 +132,8 @@ func main() {
 	}
 
 	log.Println("Connected with the database.")
+
+	broker.StartBroker()
 
 	router := mux.NewRouter()
 

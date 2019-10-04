@@ -1,6 +1,7 @@
-package pusher
+package broker
 
 import (
+	"github.com/emanueljoivo/telemetry-aggregator/pkg/models"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
 	"log"
@@ -8,16 +9,14 @@ import (
 )
 
 type Pusher interface {
-	PushMetric(o *Metric)
+	PushMetric(o *models.Metric)
 }
 
-const (
-	PushGatewayAddr = "PUSHGATEWAY_ADDR"
-)
+const PushGatewayAddr = "PUSHGATEWAY_ADDR"
 
 type PrometheusPusher struct{}
 
-func (p PrometheusPusher) PushMetric(m *Metric) {
+func (p PrometheusPusher) PushMetric(m *models.Metric) {
 
 	pushgatewayAddr, exists := os.LookupEnv(PushGatewayAddr)
 

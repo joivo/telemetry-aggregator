@@ -1,4 +1,4 @@
-package pusher
+package models
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,3 +12,8 @@ type Metric struct {
 	Value 		 float64			`json:"value" bson:"value"`
 	Metadata     map[string]string  `json:"metadata" bson:"metadata"`
 }
+
+type Version struct {
+	Tag string `json:"tag"`
+}
+
