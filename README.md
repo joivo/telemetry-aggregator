@@ -2,13 +2,12 @@
 <br />  
 <p align="center">  
   <a href="https://github.com/github_username/repo">  
-    <img src="docs/assets/logo.png" alt="Logo" width="80" height="80">  
+    <img src="docs/assets/logo.png" alt="Logo" width="120" height="120">  
   </a>  
   <p align="center">  
     Fogbow metrics for any scraper  
     <br />  
-    <a href="[https://www.fogbowcloud.org/](https://www.fogbowcloud.org/)"><strong>Explore the docs »</strong></a>  
-    <br />  
+    <a href="https://www.fogbowcloud.org"><strong>Explore the docs »</strong></a>      
     <br />  
     <a href="https://github.com/fogbow">Open Source</a>    
   </p>  
