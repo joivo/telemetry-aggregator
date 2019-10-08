@@ -91,7 +91,7 @@ where {id} is the id of the metric generated when it was generated.
 <!-- ROADMAP -->  
 ## Roadmap  
   
-See the [open issues](https://github.com/github_username/repo/issues) for a list of proposed features (and known issues).  
+See the [open issues](https://github.com/emanueljoivo/aggregator/issues) for a list of proposed features (and known issues).  
   
   
   
