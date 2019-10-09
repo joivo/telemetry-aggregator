@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -79,7 +79,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "ras_reachability{target_label=\"test-site3\"}",
+          "expr": "ras_reachability{target_label=\"test-site3\", service=\"ras\"}",
           "intervalFactor": 1,
           "refId": "A"
         }
@@ -95,9 +95,14 @@
           "op": "=",
           "text": "UP",
           "value": "1"
+        },
+        {
+          "op": "=",
+          "text": "DOWN",
+          "value": "0"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -166,7 +171,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "as_reachability{target_label=\"test-site3\"}",
+          "expr": "as_reachability{target_label=\"test-site3\", service=\"as\"}",
           "intervalFactor": 1,
           "refId": "A"
         }
@@ -258,7 +263,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "fns_reachability{target_label=\"test-site3\"}",
+          "expr": "fns_reachability{target_label=\"test-site3\", service=\"fns\"}",
           "refId": "A"
         }
       ],
@@ -349,7 +354,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "ms_reachability{target_label=\"test-site3\"}",
+          "expr": "ms_reachability{target_label=\"test-site3\", service=\"ms\"}",
           "refId": "A"
         }
       ],
@@ -414,7 +419,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "compute_availability{target_label=\"test-site3\"}",
+          "expr": "compute_availability{service=\"ras\", target_label=\"test-site3\"}",
           "interval": "1m",
           "refId": "A"
         }
@@ -483,7 +488,7 @@
         "avg": true,
         "current": true,
         "max": false,
-        "min": true,
+        "min": false,
         "rightSide": false,
         "show": true,
         "total": false,
@@ -515,16 +520,7 @@
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": false,
-          "line": true,
-          "op": "lt",
-          "value": 30,
-          "yaxis": "left"
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -646,7 +642,7 @@
           "format": "ms",
           "label": null,
           "logBase": 1,
-          "max": "1000",
+          "max": "60000",
           "min": "0",
           "show": true
         },
@@ -666,6 +662,7 @@
     },
     {
       "aliasColors": {
+        "volume_availability{cloud=\"cloud5\",job=\"collect_fogbow_metric\",resource=\"volume\",service=\"ras\",target_host=\"http://10.11.16.40\",target_label=\"test-site3\"}": "blue",
         "volume_availability{job=\"collect_fogbow_metric\",resource=\"volume\",service=\"ras\",target_host=\"http://10.11.16.23\",target_label=\"atm-prod\"}": "blue"
       },
       "bars": false,
@@ -707,7 +704,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "volume_availability{target_label=\"test-site3\"}",
+          "expr": "volume_availability{service=\"ras\", target_label=\"test-site3\"}",
           "interval": "1m",
           "refId": "A"
         }
@@ -778,7 +775,7 @@
         "avg": true,
         "current": true,
         "max": false,
-        "min": true,
+        "min": false,
         "rightSide": false,
         "show": true,
         "total": false,
@@ -810,16 +807,7 @@
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": false,
-          "line": true,
-          "op": "lt",
-          "value": 30,
-          "yaxis": "left"
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -941,7 +929,7 @@
           "format": "ms",
           "label": null,
           "logBase": 1,
-          "max": "1000",
+          "max": "60000",
           "min": "0",
           "show": true
         },
@@ -961,6 +949,7 @@
     },
     {
       "aliasColors": {
+        "network_availability{cloud=\"cloud5\",job=\"collect_fogbow_metric\",resource=\"network\",service=\"ras\",target_host=\"http://10.11.16.40\",target_label=\"test-site3\"}": "orange",
         "network_availability{job=\"collect_fogbow_metric\",resource=\"network\",service=\"ras\",target_host=\"http://10.11.16.23\",target_label=\"atm-prod\"}": "orange"
       },
       "bars": false,
@@ -1002,7 +991,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "network_availability{target_label=\"test-site3\"}",
+          "expr": "network_availability{service=\"ras\", target_label=\"test-site3\"}",
           "interval": "1m",
           "refId": "A"
         }
@@ -1074,7 +1063,7 @@
         "avg": true,
         "current": true,
         "max": false,
-        "min": true,
+        "min": false,
         "rightSide": false,
         "show": true,
         "total": false,
@@ -1106,16 +1095,7 @@
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": false,
-          "line": true,
-          "op": "lt",
-          "value": 30,
-          "yaxis": "left"
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -1238,7 +1218,7 @@
           "format": "ms",
           "label": null,
           "logBase": 1,
-          "max": "1000",
+          "max": "60000",
           "min": "0",
           "show": true
         },
@@ -1265,7 +1245,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {
@@ -1285,5 +1265,5 @@
   "timezone": "",
   "title": "Fogbow Test - Site 3",
   "uid": "FogbowSiteTest3",
-  "version": 3
+  "version": 4
 }
