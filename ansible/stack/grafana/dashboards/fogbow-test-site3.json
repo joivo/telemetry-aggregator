@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -79,7 +79,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "ras_reachability{target_label=\"atm-prod\"}",
+          "expr": "ras_reachability{target_label=\"test-site3\", service=\"ras\"}",
           "intervalFactor": 1,
           "refId": "A"
         }
@@ -95,9 +95,14 @@
           "op": "=",
           "text": "UP",
           "value": "1"
+        },
+        {
+          "op": "=",
+          "text": "DOWN",
+          "value": "0"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -166,7 +171,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "as_reachability{target_label=\"atm-prod\"}",
+          "expr": "as_reachability{target_label=\"test-site3\", service=\"as\"}",
           "intervalFactor": 1,
           "refId": "A"
         }
@@ -258,7 +263,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "fns_reachability{target_label=\"atm-prod\"}",
+          "expr": "fns_reachability{target_label=\"test-site3\", service=\"fns\"}",
           "refId": "A"
         }
       ],
@@ -349,7 +354,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "ms_reachability{target_label=\"atm-prod\"}",
+          "expr": "ms_reachability{target_label=\"test-site3\", service=\"ms\"}",
           "refId": "A"
         }
       ],
@@ -378,6 +383,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -413,7 +419,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "compute_availability{target_label=\"atm-prod\"}",
+          "expr": "compute_availability{service=\"ras\", target_label=\"test-site3\"}",
           "interval": "1m",
           "refId": "A"
         }
@@ -482,7 +488,7 @@
         "avg": true,
         "current": true,
         "max": false,
-        "min": true,
+        "min": false,
         "rightSide": false,
         "show": true,
         "total": false,
@@ -506,7 +512,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "compute_success_rate{service=\"ras\", target_label=\"atm-prod\"}",
+          "expr": "compute_success_rate{service=\"ras\", target_label=\"test-site3\"}",
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
@@ -514,16 +520,7 @@
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": false,
-          "line": true,
-          "op": "lt",
-          "value": 30,
-          "yaxis": "left"
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -613,7 +610,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "compute_latency{service=\"ras\", target_label=\"atm-prod\"}",
+          "expr": "compute_latency{service=\"ras\", target_label=\"test-site3\"}",
           "instant": false,
           "interval": "1m",
           "intervalFactor": 1,
@@ -645,7 +642,7 @@
           "format": "ms",
           "label": null,
           "logBase": 1,
-          "max": "1000",
+          "max": "60000",
           "min": "0",
           "show": true
         },
@@ -665,6 +662,7 @@
     },
     {
       "aliasColors": {
+        "volume_availability{cloud=\"cloud5\",job=\"collect_fogbow_metric\",resource=\"volume\",service=\"ras\",target_host=\"http://10.11.16.40\",target_label=\"test-site3\"}": "blue",
         "volume_availability{job=\"collect_fogbow_metric\",resource=\"volume\",service=\"ras\",target_host=\"http://10.11.16.23\",target_label=\"atm-prod\"}": "blue"
       },
       "bars": false,
@@ -706,7 +704,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "volume_availability{target_label=\"atm-prod\"}",
+          "expr": "volume_availability{service=\"ras\", target_label=\"test-site3\"}",
           "interval": "1m",
           "refId": "A"
         }
@@ -777,7 +775,7 @@
         "avg": true,
         "current": true,
         "max": false,
-        "min": true,
+        "min": false,
         "rightSide": false,
         "show": true,
         "total": false,
@@ -801,7 +799,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "volume_success_rate{service=\"ras\", target_label=\"atm-prod\"}",
+          "expr": "volume_success_rate{service=\"ras\", target_label=\"test-site3\"}",
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
@@ -809,16 +807,7 @@
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": false,
-          "line": true,
-          "op": "lt",
-          "value": 30,
-          "yaxis": "left"
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -908,7 +897,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "volume_latency{service=\"ras\", target_label=\"atm-prod\"}",
+          "expr": "volume_latency{service=\"ras\", target_label=\"test-site3\"}",
           "instant": false,
           "interval": "1m",
           "intervalFactor": 1,
@@ -940,7 +929,7 @@
           "format": "ms",
           "label": null,
           "logBase": 1,
-          "max": "1000",
+          "max": "60000",
           "min": "0",
           "show": true
         },
@@ -960,11 +949,13 @@
     },
     {
       "aliasColors": {
+        "network_availability{cloud=\"cloud5\",job=\"collect_fogbow_metric\",resource=\"network\",service=\"ras\",target_host=\"http://10.11.16.40\",target_label=\"test-site3\"}": "orange",
         "network_availability{job=\"collect_fogbow_metric\",resource=\"network\",service=\"ras\",target_host=\"http://10.11.16.23\",target_label=\"atm-prod\"}": "orange"
       },
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1000,7 +991,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "network_availability{target_label=\"atm-prod\"}",
+          "expr": "network_availability{service=\"ras\", target_label=\"test-site3\"}",
           "interval": "1m",
           "refId": "A"
         }
@@ -1072,7 +1063,7 @@
         "avg": true,
         "current": true,
         "max": false,
-        "min": true,
+        "min": false,
         "rightSide": false,
         "show": true,
         "total": false,
@@ -1096,7 +1087,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "network_success_rate{service=\"ras\", target_label=\"atm-prod\"}",
+          "expr": "network_success_rate{service=\"ras\", target_label=\"test-site3\"}",
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
@@ -1104,16 +1095,7 @@
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": false,
-          "line": true,
-          "op": "lt",
-          "value": 30,
-          "yaxis": "left"
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -1204,7 +1186,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "network_latency{service=\"ras\", target_label=\"atm-prod\"}",
+          "expr": "network_latency{service=\"ras\", target_label=\"test-site3\"}",
           "instant": false,
           "interval": "1m",
           "intervalFactor": 1,
@@ -1236,7 +1218,7 @@
           "format": "ms",
           "label": null,
           "logBase": 1,
-          "max": "1000",
+          "max": "60000",
           "min": "0",
           "show": true
         },
@@ -1256,14 +1238,14 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 19,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {
@@ -1281,7 +1263,7 @@
     ]
   },
   "timezone": "",
-  "title": "Fogbow ATM Prod",
-  "uid": "tiN4WYtWz",
-  "version": 10
+  "title": "Fogbow Test - Site 3",
+  "uid": "FogbowSiteTest3",
+  "version": 4
 }
